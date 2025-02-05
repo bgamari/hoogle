@@ -31,7 +31,6 @@ data CmdLine
         ,count :: Maybe Int
         ,query :: [String]
         ,repeat_ :: Int
-        ,language :: Language
         ,compare_ :: [String]
         }
     | Generate
@@ -43,7 +42,6 @@ data CmdLine
         ,local_ :: [FilePath]
         ,haddock :: Maybe FilePath
         ,debug :: Bool
-        ,language :: Language
         }
     | Server
         {port :: Int
@@ -53,7 +51,6 @@ data CmdLine
         ,local :: Bool
         ,haddock :: Maybe FilePath
         ,links :: Bool
-        ,language :: Language
         ,scope :: String
         ,home :: String
         ,host :: String
@@ -67,21 +64,19 @@ data CmdLine
         {logs :: FilePath
         ,database :: FilePath
         ,repeat_ :: Int
-        ,language :: Language
         ,scope :: String
         }
     | Test
         { deep :: Bool
         , disable_network_tests  :: Bool
         , database :: FilePath
-        , language :: Language
         }
       deriving (Data,Typeable,Show)
 
-defaultDatabaseLang :: Language -> IO FilePath
-defaultDatabaseLang lang = do
+defaultDatabaseLang :: IO FilePath
+defaultDatabaseLang = do
     dir <- getAppUserDataDirectory "hoogle"
-    pure $ dir </> "default-" ++ lower (show lang) ++ "-" ++ showVersion (trimVersion 3 version) ++ ".hoo"
+    pure $ dir </> "default-haskell-" ++ showVersion (trimVersion 3 version) ++ ".hoo"
 
 getCmdLine :: [String] -> IO CmdLine
 getCmdLine args = do
@@ -89,7 +84,7 @@ getCmdLine args = do
 
     -- fill in the default database
     args <- if database args /= "" then pure args else do
-        db <- defaultDatabaseLang $ language args; pure args{database=db}
+        db <- defaultDatabaseLang; pure args{database=db}
 
     -- fix up people using Hoogle 4 instructions
     args <- case args of
@@ -102,7 +97,7 @@ getCmdLine args = do
 
 
 defaultGenerate :: CmdLine
-defaultGenerate = generate{language=Haskell}
+defaultGenerate = generate
 
 
 cmdLineMode = cmdArgsMode $ modes [search_ &= auto,generate,server,replay,test]
@@ -120,7 +115,6 @@ search_ = Search
     ,count = Nothing &= name "n" &= help "Maximum number of results to return (defaults to 10)"
     ,query = def &= args &= typ "QUERY"
     ,repeat_ = 1 &= help "Number of times to repeat (for benchmarking)"
-    ,language = enum [x &= explicit &= name (lower $ show x) &= help ("Work with " ++ show x) | x <- enumerate] &= groupname "Language"
     ,compare_ = def &= help "Type signatures to compare against"
     } &= help "Perform a search"
 
