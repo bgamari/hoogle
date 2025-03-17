@@ -205,7 +205,7 @@ generateOpts = do
 
 unixEndpoint :: Parser ServerEndpoint
 unixEndpoint =
-    UnixSocket <$> option auto (long "socket" <> metavar "PATH" <> help "UNIX socket")
+    UnixSocket <$> option str (long "socket" <> metavar "PATH" <> help "UNIX socket")
 
 tcpEndpoint :: Parser ServerEndpoint
 tcpEndpoint =
