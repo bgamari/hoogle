@@ -76,6 +76,7 @@ library
         template-haskell,
         text,
         time >= 1.5,
+        tls,
         transformers,
         uniplate,
         utf8-string,
