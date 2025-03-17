@@ -36,20 +36,40 @@ in
 
   systemd.services."hoogle@" = {
     preStart = ''
-      hoogle generate --database=haskell.hoo +RTS -N${toString cores} -RTS
-      hoogle test --database=haskell.hoo
+      hoogle generate --database=haskell.hoo --insecure --download +RTS -N${toString cores} -RTS
     '';
-    script = "hoogle server --database=haskell.hoo --socket=socket --links +RTS -T -N${toString cores} -RTS";
-    path = [ hoogle ];
-    serviceConfig.RuntimeDirectory = "hoogle-%i";
-    serviceConfig.RootDirectory = "/run/hoogle-%i";
-    serviceConfig.BindReadOnlyPaths = [
-      # mount the nix store read-only
-      "/nix/store"
-      # getAppUserDataDirectory needs getUserEntryForID
-      "/etc/passwd"
-    ];
-
+    script = ''
+      curl https://www.stackage.org/lts/cabal.config
+      hoogle serve \
+        --database=haskell.hoo \
+        --scope=set:stackage \
+        --socket=$SOCKET \
+        --links \
+        +RTS -T -N${toString cores} -RTS;
+    '';
+    path = [ hoogle pkgs.curl ];
+    serviceConfig = {
+      TimeoutStartSec = 600;
+      RuntimeDirectory = "hoogle-%i";
+      WorkingDirectory = "%t/hoogle-%i";
+      BindReadOnlyPaths = [
+        # mount the nix store read-only
+        "/nix/store"
+        # getAppUserDataDirectory needs getUserEntryForID
+        "/etc/passwd"
+        #"/etc/ssl" "/etc/ssl/certs"
+      ];
+      PrivateNetwork = false;
+      #PrivateTmp = false;
+      #ProtectSystem = false;
+      #ProtectHome = false;
+      #NoNewPrivileges = false;
+    };
+    environment = {
+      SOCKET = "%t/hoogle-%i/socket";
+      SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+    };
   };
 
   systemd.tmpfiles.rules =
