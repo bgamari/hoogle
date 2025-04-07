@@ -33,6 +33,14 @@
               domain = "hoogle-test";
               cores = 4;
             })
+            {
+              services.nginx.virtualHosts."hoogle.haskell.org" = {
+                locations."/" = {
+                  proxyPass = "http://hoogle";
+                };
+                addSSL = true;
+              };
+            }
           ];
         };
 
@@ -42,15 +50,6 @@
               hoogle = self.packages.${pkgs.stdenv.hostPlatform.system}.hoogle;
               cores = 4;
             })
-
-            {
-              services.nginx.virtualHosts."hoogle.haskell.org" = {
-                locations."/" = {
-                  proxyPass = "http://hoogle";
-                };
-                addSSL = true;
-              };
-            }
           ];
         };
       };
