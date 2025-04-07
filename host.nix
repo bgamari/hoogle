@@ -1,4 +1,4 @@
-{ hoogle, domain, cores ? 4 }:
+{ hoogle, cores ? 4 }:
 { config, pkgs, ... }:
 
 # The Plan:
@@ -80,12 +80,6 @@ in
     upstreams.hoogle.extraConfig = ''
       include ${nginxConf}
     '';
-    virtualHosts.${domain} = {
-      locations."/" = {
-        proxyPass = "http://hoogle";
-      };
-      addSSL = true;
-    };
   };
 }
 

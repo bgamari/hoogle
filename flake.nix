@@ -40,9 +40,17 @@
           imports = [
             (import ./host.nix {
               hoogle = self.packages.${pkgs.stdenv.hostPlatform.system}.hoogle;
-              domain = "hoogle.haskell.org";
               cores = 4;
             })
+
+            {
+              services.nginx.virtualHosts."hoogle.haskell.org" = {
+                locations."/" = {
+                  proxyPass = "http://hoogle";
+                };
+                addSSL = true;
+              };
+            }
           ];
         };
       };
