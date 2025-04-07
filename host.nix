@@ -26,7 +26,7 @@ in
     script = ''
       n="$(date +%Y%m%d-%H%M%S)"
       systemctl start "hoogle@$n"
-      echo "server unix:/run/hoogle-$n/socket" > ${nginxConf}
+      echo "server unix:/run/hoogle-$n/socket;" > ${nginxConf}
       systemctl reload nginx.service
       sleep 1
       # Stop old instance
