@@ -78,7 +78,7 @@ in
 
   services.nginx = {
     upstreams.hoogle.extraConfig = ''
-      include ${nginxConf}
+      include ${nginxConf};
     '';
   };
 }
